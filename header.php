@@ -15,10 +15,10 @@
                 if (function_exists('the_custom_logo') && has_custom_logo()) {
                     the_custom_logo();
                 } else {
-                    echo '<img src="https://via.placeholder.com/48" alt="">';
+                    echo '<a href="' . esc_url(home_url('/')) . '"><img src="https://via.placeholder.com/48" alt=""></a>';
                 }
                 ?>
-                <div class="un-text"><?php bloginfo('name'); ?></div>
+                <a href="<?php echo esc_url(home_url('/')); ?>" class="un-text"><?php bloginfo('name'); ?></a>
             </div>
             <div class="divider"></div>
             <div class="site-title">
@@ -35,6 +35,27 @@
         <?php get_search_form(); ?>
     </div>
 </header>
+<nav class="site-nav clearfix">
+    <div class="nav-inner">
+        <div class="navbar-nav">
+        <?php
+        $exclude_id = 0;
+        $uncat = get_category_by_slug('uncategorized');
+        if ($uncat && isset($uncat->term_id)) { $exclude_id = (int)$uncat->term_id; }
+        $cats = get_categories([
+            'orderby' => 'name',
+            'order' => 'ASC',
+            'hide_empty' => 1,
+            'exclude' => $exclude_id,
+            'parent' => 0,
+        ]);
+        foreach ($cats as $c) {
+            echo '<a href="' . esc_url(get_category_link($c->term_id)) . '" class="nav-pill">' . esc_html($c->name) . '</a>';
+        }
+        ?>
+        </div>
+    </div>
+</nav>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   var btn=document.querySelector('.header-right');

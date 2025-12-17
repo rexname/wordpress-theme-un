@@ -20,8 +20,7 @@
         ?>
     </nav>
 <?php else : ?>
-    <p>Tidak ada konten.</p>
+    <p>No content.</p>
 <?php endif; ?>
 
 <?php get_footer(); ?>
-

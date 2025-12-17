@@ -37,7 +37,7 @@ if ($hq->have_posts()) {
 }
 if (!$hero_text) {
     $tagline = get_bloginfo('description');
-    $hero_text = $tagline ? $tagline : 'Selamat datang di situs WordPress Anda.';
+    $hero_text = $tagline ? $tagline : 'Welcome to your WordPress site.';
 }
 ?>
 
@@ -91,7 +91,7 @@ if (!$hero_text) {
                 <img src="https://via.placeholder.com/600x340" alt="">
                 <div class="story-content">
                     <span class="tag">Info</span>
-                    <h3>Belum ada artikel terbaru</h3>
+                    <h3>No recent articles yet</h3>
                 </div>
             </article>
         <?php endif; ?>
@@ -116,7 +116,7 @@ if (!$hero_text) {
                     <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
                 <?php endwhile; wp_reset_postdata();
             else : ?>
-                <li>Belum ada headline.</li>
+                <li>No headlines yet.</li>
             <?php endif; ?>
         </ul>
     </aside>
@@ -150,7 +150,7 @@ if (!$hero_text) {
                     <?php if (has_post_thumbnail()) { the_post_thumbnail('category-hero'); } else { echo '<img src="https://via.placeholder.com/960x300" alt="">'; } ?>
                 </a>
                 <div class="content">
-                    <div class="tag"><?php echo esc_html($cat_name ?: 'Kategori'); ?></div>
+                    <div class="tag"><?php echo esc_html($cat_name ?: 'Category'); ?></div>
                     <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
                     <?php $hero_excerpt = has_excerpt() ? get_the_excerpt() : wp_trim_words(wp_strip_all_tags(get_the_content()), 28); ?>
                     <div class="excerpt"><?php echo esc_html($hero_excerpt); ?></div>
@@ -158,7 +158,7 @@ if (!$hero_text) {
             </article>
 
             <div class="category-cards">
-                <?php while ($q->have_posts()) : $q->the_post(); ?>
+                <?php $cards_count = 0; while ($q->have_posts()) : $q->the_post(); $cards_count++; ?>
                     <article class="category-card">
                         <a href="<?php the_permalink(); ?>">
                             <?php if (has_post_thumbnail()) { the_post_thumbnail('category-thumb'); } else { echo '<img src="https://via.placeholder.com/460x300" alt="">'; } ?>
@@ -167,7 +167,9 @@ if (!$hero_text) {
                             <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
                         </div>
                     </article>
-                <?php endwhile; wp_reset_postdata(); ?>
+                <?php endwhile; if ($cards_count % 2 !== 0) : ?>
+                    <article class="category-card placeholder"><img src="https://via.placeholder.com/460x300" alt=""><div class="content"><div class="title">&nbsp;</div></div></article>
+                <?php endif; wp_reset_postdata(); ?>
             </div>
         </div>
         </div>
@@ -182,15 +184,14 @@ if (!$hero_text) {
         <aside class="category-aside">
             <div class="category-widgets">
                 <div class="widget-box">
-                    <h4>Listen to UN Radio</h4>
+                    <h4>Latest in <?php echo esc_html($cat_name ?: 'Category'); ?></h4>
                     <ul class="widget-list">
                         <?php if ($aside->have_posts()) : while ($aside->have_posts()) : $aside->the_post(); ?>
                             <li>
                                 <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-                                <span class="meta-time"><?php echo esc_html(get_the_time('H:i')); ?></span>
                             </li>
                         <?php endwhile; wp_reset_postdata(); else : ?>
-                            <li>Belum ada konten.</li>
+                            <li>No articles yet.</li>
                         <?php endif; ?>
                     </ul>
                 </div>
@@ -210,7 +211,7 @@ if (!$hero_text) {
                 }
                 ?>
                 <div class="widget-box">
-                    <h4>Interviews</h4>
+                    <h4>Highlights</h4>
                     <ul class="widget-list thumbnails">
                         <?php if ($interviews->have_posts()) : while ($interviews->have_posts()) : $interviews->the_post(); ?>
                             <li>
@@ -220,7 +221,7 @@ if (!$hero_text) {
                                 <a href="<?php the_permalink(); ?>" class="title-small"><?php the_title(); ?></a>
                             </li>
                         <?php endwhile; wp_reset_postdata(); else : ?>
-                            <li>Belum ada wawancara.</li>
+                            <li>No highlights yet.</li>
                         <?php endif; ?>
                     </ul>
                 </div>
@@ -249,7 +250,7 @@ if (!$hero_text) {
                 <div class="category-main" style="min-width:0">
                     <div class="category-header">
                         <h3><a href="<?php echo esc_url(get_category_link($acat->term_id)); ?>"><?php echo esc_html($acat->name); ?></a></h3>
-                        <a href="<?php echo esc_url(get_category_link($acat->term_id)); ?>">Lihat semua</a>
+                        <a href="<?php echo esc_url(get_category_link($acat->term_id)); ?>">View all</a>
                     </div>
                     <div class="category-grid">
                         <?php $cq->the_post(); ?>
@@ -265,7 +266,7 @@ if (!$hero_text) {
                             </div>
                         </article>
                         <div class="category-cards">
-                            <?php while ($cq->have_posts()) : $cq->the_post(); ?>
+                            <?php $cards_count = 0; while ($cq->have_posts()) : $cq->the_post(); $cards_count++; ?>
                                 <article class="category-card">
                                     <a href="<?php the_permalink(); ?>">
                                         <?php if (has_post_thumbnail()) { the_post_thumbnail('category-thumb'); } else { echo '<img src="https://via.placeholder.com/460x300" alt="">'; } ?>
@@ -274,7 +275,9 @@ if (!$hero_text) {
                                         <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
                                     </div>
                                 </article>
-                            <?php endwhile; wp_reset_postdata(); ?>
+                            <?php endwhile; if ($cards_count % 2 !== 0) : ?>
+                                <article class="category-card placeholder"><img src="https://via.placeholder.com/460x300" alt=""><div class="content"><div class="title">&nbsp;</div></div></article>
+                            <?php endif; wp_reset_postdata(); ?>
                         </div>
                     </div>
                 </div>
@@ -287,7 +290,7 @@ if (!$hero_text) {
                 ]);
                 ?>
                 <aside class="category-aside">
-                    <h4><?php echo esc_html($acat->name); ?> Lainnya</h4>
+                    <h4>More from <?php echo esc_html($acat->name); ?></h4>
                     <ul>
                         <?php if ($aside->have_posts()) : while ($aside->have_posts()) : $aside->the_post(); ?>
                             <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>

@@ -4,24 +4,19 @@
 <?php
 $cat = get_queried_object();
 $cat_id = is_category() ? $cat->term_id : 0;
-$cat_name = is_category() ? $cat->name : 'Kategori';
-$q = new WP_Query([
-    'cat' => $cat_id,
-    'posts_per_page' => 5,
-    'ignore_sticky_posts' => true,
-]);
+$cat_name = is_category() ? $cat->name : 'Category';
+$displayed_ids = [];
 ?>
 
-<?php if ($q->have_posts()) : ?>
+<?php if (have_posts()) : ?>
 <section class="category-section">
     <div class="category-layout">
         <div class="category-main" style="min-width:0">
             <div class="category-header">
                 <h3><?php echo esc_html($cat_name); ?></h3>
-                <a href="<?php echo esc_url(get_category_link($cat_id)); ?>">Lihat semua</a>
             </div>
             <div class="category-grid">
-                <?php $q->the_post(); ?>
+                <?php the_post(); $displayed_ids[] = get_the_ID(); ?>
                 <article class="category-hero">
                     <a href="<?php the_permalink(); ?>">
                         <?php if (has_post_thumbnail()) { the_post_thumbnail('category-hero'); } else { echo '<img src="https://via.placeholder.com/960x300" alt="">'; } ?>
@@ -35,7 +30,7 @@ $q = new WP_Query([
                 </article>
 
                 <div class="category-cards">
-                    <?php while ($q->have_posts()) : $q->the_post(); ?>
+                    <?php while (have_posts()) : the_post(); $displayed_ids[] = get_the_ID(); ?>
                         <article class="category-card">
                             <a href="<?php the_permalink(); ?>">
                                 <?php if (has_post_thumbnail()) { the_post_thumbnail('category-thumb'); } else { echo '<img src="https://via.placeholder.com/460x300" alt="">'; } ?>
@@ -44,20 +39,32 @@ $q = new WP_Query([
                                 <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
                             </div>
                         </article>
-                    <?php endwhile; wp_reset_postdata(); ?>
+                    <?php endwhile; ?>
                 </div>
             </div>
+            <nav class="pagination" aria-label="Pagination">
+                <?php
+                the_posts_pagination([
+                    'mid_size' => 2,
+                    'prev_text' => '← Previous',
+                    'next_text' => 'Next →',
+                    'screen_reader_text' => 'Posts navigation',
+                    'before_page_number' => '<span class="page">',
+                    'after_page_number' => '</span>',
+                ]);
+                ?>
+            </nav>
         </div>
         <?php
         $aside = new WP_Query([
             'cat' => $cat_id,
             'posts_per_page' => 6,
-            'post__not_in' => wp_list_pluck($q->posts, 'ID'),
+            'post__not_in' => $displayed_ids,
             'ignore_sticky_posts' => true,
         ]);
         ?>
         <aside class="category-aside">
-            <h4><?php echo esc_html($cat_name); ?> Lainnya</h4>
+            <h4>More from <?php echo esc_html($cat_name); ?></h4>
             <ul>
                 <?php if ($aside->have_posts()) : while ($aside->have_posts()) : $aside->the_post(); ?>
                     <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
@@ -67,8 +74,7 @@ $q = new WP_Query([
     </div>
 </section>
 <?php else : ?>
-    <p>Tidak ada artikel di kategori ini.</p>
+    <p>No articles in this category.</p>
 <?php endif; ?>
 
 <?php get_footer(); ?>
-

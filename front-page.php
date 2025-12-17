@@ -230,4 +230,80 @@ if (!$hero_text) {
     <?php endif; ?>
 </section>
 
+<section class="category-section all-categories">
+    <?php
+    $all_cats = get_categories([
+        'hide_empty' => false,
+        'orderby' => 'name',
+        'order' => 'ASC',
+    ]);
+    if (!empty($all_cats)) :
+        foreach ($all_cats as $acat) :
+            $cq = new WP_Query([
+                'cat' => $acat->term_id,
+                'posts_per_page' => 5,
+                'ignore_sticky_posts' => true,
+            ]);
+            if ($cq->have_posts()) : ?>
+            <div class="category-layout">
+                <div class="category-main" style="min-width:0">
+                    <div class="category-header">
+                        <h3><a href="<?php echo esc_url(get_category_link($acat->term_id)); ?>"><?php echo esc_html($acat->name); ?></a></h3>
+                        <a href="<?php echo esc_url(get_category_link($acat->term_id)); ?>">Lihat semua</a>
+                    </div>
+                    <div class="category-grid">
+                        <?php $cq->the_post(); ?>
+                        <article class="category-hero">
+                            <a href="<?php the_permalink(); ?>">
+                                <?php if (has_post_thumbnail()) { the_post_thumbnail('category-hero'); } else { echo '<img src="https://via.placeholder.com/960x300" alt="">'; } ?>
+                            </a>
+                            <div class="content">
+                                <div class="tag"><?php echo esc_html($acat->name); ?></div>
+                                <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
+                                <?php $hex = has_excerpt() ? get_the_excerpt() : wp_trim_words(wp_strip_all_tags(get_the_content()), 28); ?>
+                                <div class="excerpt"><?php echo esc_html($hex); ?></div>
+                            </div>
+                        </article>
+                        <div class="category-cards">
+                            <?php while ($cq->have_posts()) : $cq->the_post(); ?>
+                                <article class="category-card">
+                                    <a href="<?php the_permalink(); ?>">
+                                        <?php if (has_post_thumbnail()) { the_post_thumbnail('category-thumb'); } else { echo '<img src="https://via.placeholder.com/460x300" alt="">'; } ?>
+                                    </a>
+                                    <div class="content">
+                                        <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
+                                    </div>
+                                </article>
+                            <?php endwhile; wp_reset_postdata(); ?>
+                        </div>
+                    </div>
+                </div>
+                <?php
+                $aside = new WP_Query([
+                    'cat' => $acat->term_id,
+                    'posts_per_page' => 6,
+                    'post__not_in' => wp_list_pluck($cq->posts, 'ID'),
+                    'ignore_sticky_posts' => true,
+                ]);
+                ?>
+                <aside class="category-aside">
+                    <h4><?php echo esc_html($acat->name); ?> Lainnya</h4>
+                    <ul>
+                        <?php if ($aside->have_posts()) : while ($aside->have_posts()) : $aside->the_post(); ?>
+                            <li><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></li>
+                        <?php endwhile; wp_reset_postdata(); endif; ?>
+                    </ul>
+                </aside>
+            </div>
+            <?php endif; 
+        endforeach;
+    else : ?>
+        <div class="category-layout">
+            <div class="category-main" style="min-width:0">
+                <div class="category-header"><h3>Kategori belum tersedia</h3></div>
+            </div>
+        </div>
+    <?php endif; ?>
+</section>
+
 <?php get_footer(); ?>

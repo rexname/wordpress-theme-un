@@ -32,6 +32,43 @@
                         <div class="next"><?php next_post_link('%link','Next →'); ?></div>
                     </nav>
                 </footer>
+
+                <?php
+                $more_cat_id = (!empty($cats)) ? $cats[0]->term_id : 0;
+                if ($more_cat_id) {
+                    $moreq = new WP_Query([
+                        'posts_per_page' => 4,
+                        'ignore_sticky_posts' => true,
+                        'post__not_in' => [get_the_ID()],
+                        'category__in' => [$more_cat_id],
+                    ]);
+                    if ($moreq->have_posts()) : ?>
+                        <section class="category-section category-inline" aria-label="More from category">
+                            <div class="category-layout">
+                                <div class="category-main" style="min-width:0">
+                                    <div class="category-header">
+                                        <h3>More from <?php echo esc_html($cats[0]->name); ?></h3>
+                                    </div>
+                                    <div class="category-grid">
+                                        <div class="category-cards">
+                                            <?php while ($moreq->have_posts()) : $moreq->the_post(); ?>
+                                                <article class="category-card">
+                                                    <a href="<?php the_permalink(); ?>">
+                                                        <?php if (has_post_thumbnail()) { the_post_thumbnail('category-thumb'); } else { echo '<img src="https://via.placeholder.com/460x300" alt="">'; } ?>
+                                                    </a>
+                                                    <div class="content">
+                                                        <div class="title"><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></div>
+                                                    </div>
+                                                </article>
+                                            <?php endwhile; wp_reset_postdata(); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    <?php endif;
+                }
+                ?>
             </div>
             <aside class="single-aside">
                 <div class="widget-box">

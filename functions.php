@@ -24,3 +24,26 @@ function un_assets() {
     wp_enqueue_style('un-style', get_stylesheet_uri(), [], $ver);
 }
 add_action('wp_enqueue_scripts', 'un_assets');
+
+function un_search_order($q) {
+    if ($q->is_main_query() && $q->is_search()) {
+        $sort = isset($_GET['sort']) ? sanitize_text_field($_GET['sort']) : '';
+        $q->set('post_type', 'post');
+        $q->set('posts_per_page', 11);
+        if ($sort === 'recent') {
+            $q->set('orderby', 'date');
+            $q->set('order', 'DESC');
+        } elseif ($sort === 'relevant') {
+            $q->set('orderby', 'relevance');
+            $q->set('order', 'DESC');
+        }
+    }
+}
+add_action('pre_get_posts', 'un_search_order');
+
+function un_category_page_size($q) {
+    if ($q->is_main_query() && $q->is_category()) {
+        $q->set('posts_per_page', 11);
+    }
+}
+add_action('pre_get_posts', 'un_category_page_size');

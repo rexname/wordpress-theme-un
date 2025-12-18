@@ -32,7 +32,14 @@
         </div>
     </div>
     <div class="site-search">
-        <?php get_search_form(); ?>
+        <form id="un-search-form" action="<?php echo esc_url(home_url('/')); ?>" method="get">
+            <div class="search-bar">
+                <input type="search" name="s" placeholder="Looking for something?">
+                <button type="submit" class="search-btn" aria-label="Search"></button>
+            </div>
+            <input type="hidden" name="sort" value="recent">
+            <div class="results" id="un-search-results"></div>
+        </form>
     </div>
 </header>
 <nav class="site-nav clearfix">
@@ -60,12 +67,39 @@
 document.addEventListener('DOMContentLoaded',function(){
   var btn=document.querySelector('.header-right');
   var header=document.querySelector('.site-header');
+  var form=document.getElementById('un-search-form');
+  var input=form?form.querySelector('input[name=\"s\"]'):null;
+  var results=document.getElementById('un-search-results');
+  function render(items){
+    if(!results){return}
+    var html='';
+    if(items&&items.length){
+      var first=items[0];
+      html+='<section class=\"category-section\"><div class=\"category-layout\"><div class=\"category-main\" style=\"min-width:0\"><div class=\"category-grid\">';
+      var img=(first._embedded&&first._embedded['wp:featuredmedia']&&first._embedded['wp:featuredmedia'][0]&&first._embedded['wp:featuredmedia'][0].media_details&&first._embedded['wp:featuredmedia'][0].media_details.sizes&&first._embedded['wp:featuredmedia'][0].media_details.sizes.large&&first._embedded['wp:featuredmedia'][0].media_details.sizes.large.source_url)?first._embedded['wp:featuredmedia'][0].media_details.sizes.large.source_url:'https://via.placeholder.com/960x300';
+      html+='<article class=\"category-hero\"><a href=\"'+first.link+'\"><img src=\"'+img+'\" alt=\"\"></a><div class=\"content\"><div class=\"title\"><a href=\"'+first.link+'\">'+first.title.rendered+'</a></div></div></article>';
+      html+='<div class=\"category-cards\">';
+      for(var i=1;i<items.length;i++){var it=items[i];var im=(it._embedded&&it._embedded['wp:featuredmedia']&&it._embedded['wp:featuredmedia'][0]&&it._embedded['wp:featuredmedia'][0].media_details&&it._embedded['wp:featuredmedia'][0].media_details.sizes&&it._embedded['wp:featuredmedia'][0].media_details.sizes.medium&&it._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url)?it._embedded['wp:featuredmedia'][0].media_details.sizes.medium.source_url:'https://via.placeholder.com/460x300';html+='<article class=\"category-card\"><a href=\"'+it.link+'\"><img src=\"'+im+'\" alt=\"\"></a><div class=\"content\"><div class=\"title\"><a href=\"'+it.link+'\">'+it.title.rendered+'</a></div></div></article>'}
+      if(((items.length-1)%2)!==0){html+='<article class=\"category-card placeholder\"><img src=\"https://via.placeholder.com/460x300\" alt=\"\"><div class=\"content\"><div class=\"title\">&nbsp;</div></div></article>'}
+      html+='</div></div></div></div></section>';
+    } else {
+      html='<section class=\"category-section\"><div class=\"category-layout\"><div class=\"category-main\" style=\"min-width:0\"><h3>No results found</h3></div></div></section>';
+    }
+    results.innerHTML=html;
+  }
+  function search(q){
+    if(!q||q.length<2){render([]);return}
+    fetch('<?php echo esc_url(home_url('/wp-json/wp/v2/posts')); ?>?search='+encodeURIComponent(q)+'&per_page=7&_embed').then(function(r){return r.json()}).then(render).catch(function(){render([])});
+  }
   if(btn&&header){
     btn.addEventListener('click',function(){
       header.classList.toggle('is-search-open');
-      var input=header.querySelector('.site-search input[type="search"]');
       if(header.classList.contains('is-search-open')&&input){input.focus();}
     });
+  }
+  if(form&&input){
+    form.addEventListener('submit',function(e){e.preventDefault();search(input.value)});
+    var t;input.addEventListener('input',function(){clearTimeout(t);var v=this.value;t=setTimeout(function(){search(v)},300)});
   }
 });
 </script>
